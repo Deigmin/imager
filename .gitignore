@@ -6,3 +6,4 @@
 **/.commands.out.sh
 Cargo.lock
 release/
+.idea

@@ -6,7 +6,6 @@ FROM rust:latest as build
 # SETUP
 WORKDIR /code/
 RUN apt-get -y update && \
-    apt-get -y upgrade && \
     apt-get -y install software-properties-common curl git vim tree
 
 # SYSTEM DEPENDENCIES
@@ -45,7 +44,6 @@ FROM ubuntu:18.04 as runtime
 
 # SETUP
 RUN apt-get -y update && \
-    apt-get -y upgrade && \
     apt-get -y install build-essential software-properties-common curl git vim tree
 COPY --from=build /usr/local/cargo/bin/imager /bin/imager
 

@@ -1,13 +1,13 @@
+use either::{Either, Either::*};
+use image::{DynamicImage, GenericImage, GenericImageView, ImageFormat};
+use serde::{Deserialize, Serialize};
 use std::convert::AsRef;
 use std::path::{Path, PathBuf};
-use image::{DynamicImage, GenericImage, GenericImageView, ImageFormat};
-use either::{Either, Either::*};
-use serde::{Serialize, Deserialize};
 
-use crate::data::{Resolution, OutputFormat};
 use crate::codec::jpeg;
 use crate::codec::png;
 use crate::codec::webp;
+use crate::data::{OutputFormat, Resolution};
 
 pub struct OptJob {
     source: DynamicImage,
@@ -36,7 +36,7 @@ impl OptJob {
             ImageFormat::JPEG => OutputFormat::Jpeg,
             ImageFormat::PNG => OutputFormat::Png,
             ImageFormat::WEBP => OutputFormat::Webp,
-            _ => OutputFormat::Jpeg
+            _ => OutputFormat::Jpeg,
         };
         match source_format {
             ImageFormat::WEBP => {
@@ -50,11 +50,8 @@ impl OptJob {
                 })
             }
             _ => {
-                let source = ::image::load_from_memory_with_format(
-                        source,
-                        source_format,
-                    )
-                    .map_err(drop)?;
+                let source =
+                    ::image::load_from_memory_with_format(source, source_format).map_err(drop)?;
                 let source = crate::data::ensure_even_reslution(&source);
                 Ok(OptJob {
                     output_format,
@@ -74,8 +71,9 @@ impl OptJob {
     pub fn run(self, extreme_mode: bool) -> Result<(Vec<u8>, OutMeda), ()> {
         let input = match self.max_size {
             Some(res) if (res.width, res.height) < self.source.dimensions() => {
-                self.source.resize(res.width, res.height, ::image::FilterType::Lanczos3)
-            },
+                self.source
+                    .resize(res.width, res.height, ::image::FilterType::Lanczos3)
+            }
             _ => self.source.clone(),
         };
         match self.output_format {
@@ -91,8 +89,8 @@ impl OptJob {
                 Ok((out, meta))
             }
             OutputFormat::Jpeg => {
-                let (out, meta) = jpeg::OptContext::from_image(input.clone())
-                    .run_search(extreme_mode);
+                let (out, meta) =
+                    jpeg::OptContext::from_image(input.clone()).run_search(extreme_mode);
                 let meta = OutMeda {
                     input_class: meta.class,
                     input_path: None,
